@@ -1,0 +1,282 @@
+/* ── GrapesJS builder chrome overrides ──────────────────────────────────────
+ * All overrides apply to GrapesJS elements rendered inside our custom
+ * React layout. The canvas itself is unstyled (Tailwind CDN is injected
+ * inside the iframe instead).
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Canvas container ────────────────────────────────────────────────────── */
+#gjs {
+  height: 100%;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.gjs-editor {
+  height: 100% !important;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.gjs-cv-canvas {
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #e5e7eb;
+}
+
+/* Hide GrapesJS's built-in toolbars / panels chrome */
+.gjs-pn-panels,
+.gjs-toolbar-items { display: none !important; }
+
+/* ── Block manager (left panel) ──────────────────────────────────────────── */
+.builder-blocks-panel .gjs-blocks-c {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+}
+
+.builder-blocks-panel .gjs-block {
+  width: calc(50% - 3px);
+  min-height: 64px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  font-size: 10px;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+  cursor: grab;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.builder-blocks-panel .gjs-block:hover {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+  color: #4f46e5;
+}
+
+.builder-blocks-panel .gjs-block-label {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.builder-blocks-panel .gjs-block__media svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+}
+
+/* Category headers */
+.builder-blocks-panel .gjs-block-category .gjs-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 8px 10px 4px;
+  background: transparent;
+  border: none;
+}
+
+.builder-blocks-panel .gjs-block-category {
+  border: none;
+}
+
+/* ── Style manager (right panel) ─────────────────────────────────────────── */
+.builder-style-panel .gjs-sm-sectors {
+  padding: 4px 0;
+}
+
+.builder-style-panel .gjs-sm-sector {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.builder-style-panel .gjs-sm-sector-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  padding: 8px 12px;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+.builder-style-panel .gjs-sm-sector-title:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.builder-style-panel .gjs-sm-properties {
+  padding: 4px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.builder-style-panel .gjs-sm-property {
+  font-size: 10px;
+}
+
+.builder-style-panel .gjs-sm-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.builder-style-panel .gjs-field input,
+.builder-style-panel .gjs-field select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #374151;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.builder-style-panel .gjs-field input:focus,
+.builder-style-panel .gjs-field select:focus {
+  border-color: #6366f1;
+  background: #fff;
+}
+
+.builder-style-panel .gjs-field-color-picker {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Slider */
+.builder-style-panel .gjs-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Layer manager (right panel) ─────────────────────────────────────────── */
+.builder-layers-panel .gjs-layer {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.builder-layers-panel .gjs-layer:hover {
+  background: #f3f4f6;
+}
+
+.builder-layers-panel .gjs-layer.gjs-selected {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.builder-layers-panel .gjs-layer-title {
+  font-size: 11px;
+}
+
+/* ── Traits panel ─────────────────────────────────────────────────────────── */
+.builder-traits-panel .gjs-trt-trait {
+  margin-bottom: 8px;
+}
+
+.builder-traits-panel .gjs-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+
+.builder-traits-panel .gjs-field input,
+.builder-traits-panel .gjs-field select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #374151;
+  width: 100%;
+  outline: none;
+}
+
+/* ── Toolbar (element hover) ─────────────────────────────────────────────── */
+.gjs-toolbar {
+  background: #4f46e5;
+  border-radius: 6px;
+  padding: 2px;
+  z-index: 999;
+}
+
+.gjs-toolbar-item {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.gjs-toolbar-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Selected element badge ───────────────────────────────────────────────── */
+.gjs-badge {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* ── Highlight color ──────────────────────────────────────────────────────── */
+.gjs-cv-canvas .gjs-highlighter {
+  outline: 2px solid #6366f1 !important;
+}
+
+/* ── Resizer handles ─────────────────────────────────────────────────────── */
+.gjs-resizer-h {
+  border-color: #6366f1;
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .builder-blocks-panel .gjs-block {
+    background: #1f2937;
+    border-color: #374151;
+    color: #d1d5db;
+  }
+  .builder-blocks-panel .gjs-block:hover {
+    background: #1e1b4b;
+    border-color: #6366f1;
+    color: #a5b4fc;
+  }
+  .builder-style-panel .gjs-sm-sector { border-color: #374151; }
+  .builder-style-panel .gjs-sm-sector-title { color: #6b7280; }
+  .builder-style-panel .gjs-sm-sector-title:hover { background: #111827; }
+  .builder-style-panel .gjs-field input,
+  .builder-style-panel .gjs-field select {
+    background: #1f2937;
+    border-color: #374151;
+    color: #d1d5db;
+  }
+  .builder-layers-panel .gjs-layer { color: #d1d5db; }
+  .builder-layers-panel .gjs-layer:hover { background: #1f2937; }
+  .builder-layers-panel .gjs-layer.gjs-selected { background: #1e1b4b; color: #a5b4fc; }
+}
+

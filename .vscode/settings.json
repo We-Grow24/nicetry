@@ -1,0 +1,15 @@
+{
+  // Enable Deno language server only for the edge functions folder.
+  // The rest of the repo keeps the standard TS server.
+  "deno.path": "C:\\Users\\ingal\\.deno\\bin\\deno.exe",
+  "deno.enablePaths": ["supabase/functions"],
+  "deno.unstable": true,
+  "deno.importMap": "./supabase/functions/import_map.json",
+
+  // Tell the TS server to ignore the functions folder entirely
+  // so its errors don't bleed into the Problems panel.
+  "typescript.tsserver.ignoredPaths": ["supabase/functions"],
+
+  // Exclude functions folder from the Next.js TS project
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}

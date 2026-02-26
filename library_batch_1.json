@@ -1,0 +1,737 @@
+[
+  {
+    "type": "web",
+    "niche": "ecommerce",
+    "name": "Shop Hero",
+    "tags": ["storefront", "modern", "conversion"],
+    "seed_json": {
+      "layout_seed": 0.81,
+      "cta_seed": 0.67,
+      "color_seed": 0.54,
+      "headline": "Discover Amazing Deals",
+      "subheadline": "Shop the latest trends",
+      "image": "hero_ecommerce_1.jpg",
+      "button": "Shop Now"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "SaaS",
+    "name": "Cloud Hero",
+    "tags": ["software", "cloud", "B2B"],
+    "seed_json": {
+      "layout_seed": 0.76,
+      "cta_seed": 0.59,
+      "color_seed": 0.48,
+      "headline": "Empower Your Workflow",
+      "subheadline": "Automate and scale",
+	  "image": "hero_saas_1.jpg",
+	  "button": "Get Started"
+	}
+  },
+  {
+    "type": "web",
+    "niche": "portfolio",
+    "name": "Creative Hero",
+    "tags": ["personal", "designer", "showcase"],
+    "seed_json": {
+      "layout_seed": 0.69,
+      "cta_seed": 0.53,
+      "color_seed": 0.61,
+      "headline": "Showcase Your Talent",
+      "subheadline": "Portfolio of works",
+      "image": "hero_portfolio_1.jpg",
+      "button": "View Portfolio"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "blog",
+    "name": "Insight Hero",
+    "tags": ["articles", "content", "read"],
+    "seed_json": {
+      "layout_seed": 0.74,
+      "cta_seed": 0.62,
+      "color_seed": 0.57,
+      "headline": "Read Our Latest Insights",
+      "subheadline": "Stay informed",
+      "image": "hero_blog_1.jpg",
+      "button": "Read More"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "restaurant",
+    "name": "Taste Hero",
+    "tags": ["food", "menu", "reservation"],
+    "seed_json": {
+      "layout_seed": 0.85,
+      "cta_seed": 0.71,
+      "color_seed": 0.63,
+      "headline": "Experience Fine Dining",
+      "subheadline": "Reserve your table",
+      "image": "hero_restaurant_1.jpg",
+      "button": "Book Now"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "gym",
+    "name": "Fit Hero",
+    "tags": ["fitness", "training", "membership"],
+    "seed_json": {
+      "layout_seed": 0.78,
+      "cta_seed": 0.66,
+      "color_seed": 0.58,
+      "headline": "Join the Fitness Revolution",
+      "subheadline": "Transform your body",
+      "image": "hero_gym_1.jpg",
+      "button": "Join Now"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "hospital",
+    "name": "Care Hero",
+    "tags": ["healthcare", "service", "trust"],
+    "seed_json": {
+      "layout_seed": 0.82,
+      "cta_seed": 0.69,
+      "color_seed": 0.65,
+      "headline": "Your Health, Our Priority",
+      "subheadline": "Expert medical care",
+      "image": "hero_hospital_1.jpg",
+      "button": "Contact Us"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "school",
+    "name": "Learn Hero",
+    "tags": ["education", "learning", "enroll"],
+    "seed_json": {
+      "layout_seed": 0.73,
+      "cta_seed": 0.61,
+      "color_seed": 0.56,
+      "headline": "Unlock Your Potential",
+      "subheadline": "Enroll today",
+      "image": "hero_school_1.jpg",
+      "button": "Enroll Now"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "ecommerce",
+    "name": "Market Hero",
+    "tags": ["marketplace", "shop", "deals"],
+    "seed_json": {
+      "layout_seed": 0.77,
+      "cta_seed": 0.64,
+      "color_seed": 0.52,
+      "headline": "Shop the Best Deals",
+      "subheadline": "Exclusive offers",
+      "image": "hero_ecommerce_2.jpg",
+      "button": "Browse Now"
+    }
+  },
+  {
+    "type": "web",
+    "niche": "SaaS",
+    "name": "Tech Hero",
+    "tags": ["automation", "platform", "tools"],
+    "seed_json": {
+      "layout_seed": 0.80,
+      "cta_seed": 0.68,
+      "color_seed": 0.55,
+      "headline": "Innovate Your Business",
+      "subheadline": "Tech solutions",
+      "image": "hero_saas_2.jpg",
+      "button": "Try Free"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "ninja",
+    "name": "Shadow Ninja",
+    "tags": ["stealth", "fast", "dark"],
+    "seed_json": {
+      "appearance_seed": 0.73,
+      "voice_seed": 0.44,
+      "power_seed": 0.22,
+      "speed": 1.8,
+      "health": 100,
+      "special": "shadow_clone",
+      "costume": "dark_gi",
+      "weapon": "katana"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "robot",
+    "name": "Steel Bot",
+    "tags": ["mechanical", "strong", "AI"],
+    "seed_json": {
+      "appearance_seed": 0.61,
+      "voice_seed": 0.88,
+      "power_seed": 0.77,
+      "speed": 1.2,
+      "health": 150,
+      "special": "laser_beam",
+      "costume": "metal_shell",
+      "weapon": "plasma_gun"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "warrior",
+    "name": "Blade Warrior",
+    "tags": ["brave", "strong", "armor"],
+    "seed_json": {
+      "appearance_seed": 0.85,
+      "voice_seed": 0.55,
+      "power_seed": 0.68,
+      "speed": 1.5,
+      "health": 120,
+      "special": "berserk",
+      "costume": "steel_armor",
+      "weapon": "longsword"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "wizard",
+    "name": "Arcane Wizard",
+    "tags": ["magic", "wise", "mystic"],
+    "seed_json": {
+      "appearance_seed": 0.92,
+      "voice_seed": 0.33,
+      "power_seed": 0.91,
+      "speed": 1.1,
+      "health": 90,
+      "special": "fireball",
+      "costume": "robe",
+      "weapon": "staff"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "alien",
+    "name": "Cosmic Alien",
+    "tags": ["extraterrestrial", "strange", "intelligent"],
+    "seed_json": {
+      "appearance_seed": 0.67,
+      "voice_seed": 0.29,
+      "power_seed": 0.74,
+      "speed": 1.6,
+      "health": 110,
+      "special": "teleport",
+      "costume": "bio_suit",
+      "weapon": "energy_blade"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "samurai",
+    "name": "Silent Samurai",
+    "tags": ["honor", "blade", "discipline"],
+    "seed_json": {
+      "appearance_seed": 0.79,
+      "voice_seed": 0.41,
+      "power_seed": 0.63,
+      "speed": 1.7,
+      "health": 115,
+      "special": "iaido_strike",
+      "costume": "samurai_armor",
+      "weapon": "katana"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "dragon",
+    "name": "Fire Dragon",
+    "tags": ["fire", "flying", "legendary"],
+    "seed_json": {
+      "appearance_seed": 0.97,
+      "voice_seed": 0.22,
+      "power_seed": 0.99,
+      "speed": 2.0,
+      "health": 200,
+      "special": "flame_breath",
+      "costume": "scales",
+      "weapon": "claws"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "ghost",
+    "name": "Phantom Ghost",
+    "tags": ["invisible", "haunt", "ethereal"],
+    "seed_json": {
+      "appearance_seed": 0.56,
+      "voice_seed": 0.19,
+      "power_seed": 0.38,
+      "speed": 1.9,
+      "health": 80,
+      "special": "possession",
+      "costume": "shroud",
+      "weapon": "none"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "ninja",
+    "name": "Silent Shadow",
+    "tags": ["stealth", "agile", "night"],
+    "seed_json": {
+      "appearance_seed": 0.68,
+      "voice_seed": 0.39,
+      "power_seed": 0.27,
+      "speed": 1.7,
+      "health": 95,
+      "special": "smoke_bomb",
+      "costume": "black_gi",
+      "weapon": "shuriken"
+    }
+  },
+  {
+    "type": "game",
+    "niche": "robot",
+    "name": "Mecha Titan",
+    "tags": ["giant", "AI", "powerful"],
+    "seed_json": {
+      "appearance_seed": 0.72,
+      "voice_seed": 0.91,
+      "power_seed": 0.82,
+      "speed": 1.3,
+      "health": 180,
+      "special": "rocket_punch",
+      "costume": "titan_shell",
+      "weapon": "missile_launcher"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "tense",
+    "name": "Tension Seed",
+    "tags": ["suspense", "build", "dark"],
+    "seed_json": {
+      "melody_seed": 0.81,
+      "rhythm_seed": 0.67,
+      "instrument_seed": 0.54,
+      "tempo": 120,
+      "mood": "tense",
+      "genre": "cinematic",
+      "effect": "riser"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "epic",
+    "name": "Epic Seed",
+    "tags": ["grand", "battle", "heroic"],
+    "seed_json": {
+      "melody_seed": 0.76,
+      "rhythm_seed": 0.59,
+      "instrument_seed": 0.48,
+      "tempo": 140,
+      "mood": "epic",
+      "genre": "orchestral",
+      "effect": "brass"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "happy",
+    "name": "Joy Seed",
+    "tags": ["bright", "uplifting", "fun"],
+    "seed_json": {
+      "melody_seed": 0.69,
+      "rhythm_seed": 0.53,
+      "instrument_seed": 0.61,
+      "tempo": 110,
+      "mood": "happy",
+      "genre": "pop",
+      "effect": "bells"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "sad",
+    "name": "Melancholy Seed",
+    "tags": ["emotional", "slow", "blue"],
+    "seed_json": {
+      "melody_seed": 0.74,
+      "rhythm_seed": 0.62,
+      "instrument_seed": 0.57,
+      "tempo": 90,
+      "mood": "sad",
+      "genre": "ballad",
+      "effect": "strings"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "action",
+    "name": "Action Seed",
+    "tags": ["fast", "intense", "dynamic"],
+    "seed_json": {
+      "melody_seed": 0.85,
+      "rhythm_seed": 0.71,
+      "instrument_seed": 0.63,
+      "tempo": 150,
+      "mood": "action",
+      "genre": "rock",
+      "effect": "drums"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "romantic",
+    "name": "Romance Seed",
+    "tags": ["love", "soft", "warm"],
+    "seed_json": {
+      "melody_seed": 0.78,
+      "rhythm_seed": 0.66,
+      "instrument_seed": 0.58,
+      "tempo": 100,
+      "mood": "romantic",
+      "genre": "acoustic",
+      "effect": "guitar"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "horror",
+    "name": "Horror Seed",
+    "tags": ["scary", "dark", "creepy"],
+    "seed_json": {
+      "melody_seed": 0.82,
+      "rhythm_seed": 0.69,
+      "instrument_seed": 0.65,
+      "tempo": 80,
+      "mood": "horror",
+      "genre": "ambient",
+      "effect": "screech"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "ambient",
+    "name": "Ambient Seed",
+    "tags": ["calm", "space", "background"],
+    "seed_json": {
+      "melody_seed": 0.73,
+      "rhythm_seed": 0.61,
+      "instrument_seed": 0.56,
+      "tempo": 60,
+      "mood": "ambient",
+      "genre": "electronic",
+      "effect": "pad"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "tense",
+    "name": "Suspense Seed",
+    "tags": ["build", "dark", "edge"],
+    "seed_json": {
+      "melody_seed": 0.77,
+      "rhythm_seed": 0.64,
+      "instrument_seed": 0.52,
+      "tempo": 115,
+      "mood": "tense",
+      "genre": "electronic",
+      "effect": "pulse"
+    }
+  },
+  {
+    "type": "audio",
+    "niche": "epic",
+    "name": "Legend Seed",
+    "tags": ["heroic", "grand", "battle"],
+    "seed_json": {
+      "melody_seed": 0.80,
+      "rhythm_seed": 0.68,
+      "instrument_seed": 0.55,
+      "tempo": 135,
+      "mood": "epic",
+      "genre": "cinematic",
+      "effect": "choir"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "product ad",
+    "name": "Ad Scene",
+    "tags": ["marketing", "brand", "promo"],
+    "seed_json": {
+      "lighting_seed": 0.81,
+      "camera_seed": 0.67,
+      "action_seed": 0.54,
+      "duration": 30,
+      "style": "modern",
+      "focus": "product",
+      "effect": "zoom"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "wedding",
+    "name": "Wedding Scene",
+    "tags": ["romantic", "ceremony", "love"],
+    "seed_json": {
+      "lighting_seed": 0.76,
+      "camera_seed": 0.59,
+      "action_seed": 0.48,
+      "duration": 120,
+      "style": "classic",
+      "focus": "couple",
+      "effect": "slow_motion"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "sports",
+    "name": "Sports Scene",
+    "tags": ["action", "game", "energy"],
+    "seed_json": {
+      "lighting_seed": 0.69,
+      "camera_seed": 0.53,
+      "action_seed": 0.61,
+      "duration": 60,
+      "style": "dynamic",
+      "focus": "athletes",
+      "effect": "freeze_frame"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "news",
+    "name": "News Scene",
+    "tags": ["informative", "broadcast", "current"],
+    "seed_json": {
+      "lighting_seed": 0.74,
+      "camera_seed": 0.62,
+      "action_seed": 0.57,
+      "duration": 45,
+      "style": "formal",
+      "focus": "anchor",
+      "effect": "split_screen"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "fashion",
+    "name": "Fashion Scene",
+    "tags": ["style", "runway", "trend"],
+    "seed_json": {
+      "lighting_seed": 0.85,
+      "camera_seed": 0.71,
+      "action_seed": 0.63,
+      "duration": 90,
+      "style": "chic",
+      "focus": "models",
+      "effect": "color_pop"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "food",
+    "name": "Food Scene",
+    "tags": ["cooking", "delicious", "chef"],
+    "seed_json": {
+      "lighting_seed": 0.78,
+      "camera_seed": 0.66,
+      "action_seed": 0.58,
+      "duration": 40,
+      "style": "warm",
+      "focus": "dish",
+      "effect": "steam"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "travel",
+    "name": "Travel Scene",
+    "tags": ["explore", "adventure", "journey"],
+    "seed_json": {
+      "lighting_seed": 0.82,
+      "camera_seed": 0.69,
+      "action_seed": 0.65,
+      "duration": 180,
+      "style": "cinematic",
+      "focus": "destination",
+      "effect": "panorama"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "product ad",
+    "name": "Promo Scene",
+    "tags": ["brand", "launch", "spotlight"],
+    "seed_json": {
+      "lighting_seed": 0.73,
+      "camera_seed": 0.61,
+      "action_seed": 0.56,
+      "duration": 25,
+      "style": "sleek",
+      "focus": "product",
+      "effect": "fade_in"
+    }
+  },
+  {
+    "type": "video",
+    "niche": "wedding",
+    "name": "Ceremony Scene",
+    "tags": ["love", "celebration", "family"],
+    "seed_json": {
+      "lighting_seed": 0.77,
+      "camera_seed": 0.64,
+      "action_seed": 0.52,
+      "duration": 110,
+      "style": "romantic",
+      "focus": "guests",
+      "effect": "soft_focus"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "protagonist",
+    "name": "Hero Protagonist",
+    "tags": ["main", "brave", "growth"],
+    "seed_json": {
+      "personality_seed": 0.81,
+      "appearance_seed": 0.67,
+      "power_seed": 0.54,
+      "role": "lead",
+      "goal": "save_world",
+      "trait": "determined"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "villain",
+    "name": "Dark Villain",
+    "tags": ["evil", "powerful", "ruthless"],
+    "seed_json": {
+      "personality_seed": 0.76,
+      "appearance_seed": 0.59,
+      "power_seed": 0.48,
+      "role": "antagonist",
+      "goal": "dominate",
+      "trait": "cunning"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "mentor",
+    "name": "Wise Mentor",
+    "tags": ["guide", "wise", "support"],
+    "seed_json": {
+      "personality_seed": 0.69,
+      "appearance_seed": 0.53,
+      "power_seed": 0.61,
+      "role": "teacher",
+      "goal": "train_hero",
+      "trait": "patient"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "rival",
+    "name": "Fierce Rival",
+    "tags": ["competitive", "strong", "challenge"],
+    "seed_json": {
+      "personality_seed": 0.74,
+      "appearance_seed": 0.62,
+      "power_seed": 0.57,
+      "role": "challenger",
+      "goal": "prove_superiority",
+      "trait": "ambitious"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "sidekick",
+    "name": "Loyal Sidekick",
+    "tags": ["support", "funny", "helpful"],
+    "seed_json": {
+      "personality_seed": 0.85,
+      "appearance_seed": 0.71,
+      "power_seed": 0.63,
+      "role": "assistant",
+      "goal": "help_hero",
+      "trait": "loyal"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "protagonist",
+    "name": "Dreamer Protagonist",
+    "tags": ["hopeful", "young", "growth"],
+    "seed_json": {
+      "personality_seed": 0.78,
+      "appearance_seed": 0.66,
+      "power_seed": 0.58,
+      "role": "lead",
+      "goal": "find_truth",
+      "trait": "curious"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "villain",
+    "name": "Silent Villain",
+    "tags": ["mysterious", "cold", "dangerous"],
+    "seed_json": {
+      "personality_seed": 0.82,
+      "appearance_seed": 0.69,
+      "power_seed": 0.65,
+      "role": "antagonist",
+      "goal": "revenge",
+      "trait": "calculating"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "mentor",
+    "name": "Kind Mentor",
+    "tags": ["gentle", "wise", "support"],
+    "seed_json": {
+      "personality_seed": 0.73,
+      "appearance_seed": 0.61,
+      "power_seed": 0.56,
+      "role": "teacher",
+      "goal": "guide_hero",
+      "trait": "compassionate"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "rival",
+    "name": "Shadow Rival",
+    "tags": ["dark", "competitive", "challenge"],
+    "seed_json": {
+      "personality_seed": 0.77,
+      "appearance_seed": 0.64,
+      "power_seed": 0.52,
+      "role": "challenger",
+      "goal": "outshine_hero",
+      "trait": "persistent"
+    }
+  },
+  {
+    "type": "anime",
+    "niche": "sidekick",
+    "name": "Cheerful Sidekick",
+    "tags": ["funny", "optimistic", "helpful"],
+    "seed_json": {
+      "personality_seed": 0.80,
+      "appearance_seed": 0.68,
+      "power_seed": 0.55,
+      "role": "assistant",
+      "goal": "support_hero",
+      "trait": "cheerful"
+    }
+  }
+]

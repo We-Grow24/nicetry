@@ -1,0 +1,237 @@
+/* ── App Builder — GrapesJS chrome overrides ─────────────────────────────────
+ * Mirrors builder.css but scoped to #gjs-app and the app-* panel classes.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Canvas container ────────────────────────────────────────────────────── */
+#gjs-app {
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+#gjs-app .gjs-editor {
+  height: 100% !important;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+#gjs-app .gjs-cv-canvas {
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+
+/* Hide GrapesJS built-in toolbars/panels chrome */
+#gjs-app .gjs-pn-panels { display: none !important; }
+
+/* ── Mobile block manager ────────────────────────────────────────────────── */
+.app-blocks-panel .gjs-blocks-c {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px;
+}
+
+.app-blocks-panel .gjs-block {
+  width: calc(50% - 2.5px);
+  min-height: 56px;
+  padding: 7px 5px;
+  border-radius: 10px;
+  border: 1px solid #ede9fe;
+  background: #faf5ff;
+  font-size: 10px;
+  font-weight: 500;
+  color: #3730a3;
+  text-align: center;
+  cursor: grab;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.app-blocks-panel .gjs-block:hover {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.18);
+}
+
+.app-blocks-panel .gjs-block-label {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.app-blocks-panel .gjs-block__media svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.65;
+}
+
+.app-blocks-panel .gjs-block-category .gjs-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 8px 8px 3px;
+  background: transparent;
+  border: none;
+}
+
+.app-blocks-panel .gjs-block-category { border: none; }
+
+/* ── Style manager ───────────────────────────────────────────────────────── */
+.app-style-panel .gjs-sm-sectors { padding: 4px 0; }
+.app-style-panel .gjs-sm-sector  { border-bottom: 1px solid #f3f4f6; }
+
+.app-style-panel .gjs-sm-sector-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  padding: 8px 12px;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-style-panel .gjs-sm-sector-title:hover {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.app-style-panel .gjs-sm-properties {
+  padding: 4px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-style-panel .gjs-sm-property { font-size: 10px; }
+
+.app-style-panel .gjs-sm-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.app-style-panel .gjs-field input,
+.app-style-panel .gjs-field select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #374151;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.app-style-panel .gjs-field input:focus,
+.app-style-panel .gjs-field select:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+
+/* ── Layer manager ───────────────────────────────────────────────────────── */
+.app-layers-panel .gjs-layer {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.app-layers-panel .gjs-layer:hover      { background: #f3f4f6; }
+.app-layers-panel .gjs-layer.gjs-selected { background: #ede9fe; color: #6d28d9; }
+.app-layers-panel .gjs-layer-title       { font-size: 11px; }
+
+/* ── Traits panel ────────────────────────────────────────────────────────── */
+.app-traits-panel .gjs-trt-trait { margin-bottom: 8px; }
+
+.app-traits-panel .gjs-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+
+.app-traits-panel .gjs-field input,
+.app-traits-panel .gjs-field select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #374151;
+  width: 100%;
+  outline: none;
+}
+
+/* ── Element toolbar ─────────────────────────────────────────────────────── */
+#gjs-app .gjs-toolbar {
+  background: #7c3aed;
+  border-radius: 6px;
+  padding: 2px;
+  z-index: 999;
+}
+
+#gjs-app .gjs-toolbar-item {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+#gjs-app .gjs-toolbar-item:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Badge ───────────────────────────────────────────────────────────────── */
+#gjs-app .gjs-badge {
+  background: #7c3aed;
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* ── Highlight ───────────────────────────────────────────────────────────── */
+#gjs-app .gjs-cv-canvas .gjs-highlighter {
+  outline: 2px solid #7c3aed !important;
+}
+
+/* ── Resizer ─────────────────────────────────────────────────────────────── */
+#gjs-app .gjs-resizer-h { border-color: #7c3aed; }
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .app-blocks-panel .gjs-block {
+    background: #1e1b4b;
+    border-color: #312e81;
+    color: #c4b5fd;
+  }
+  .app-blocks-panel .gjs-block:hover {
+    background: #2e1065;
+    border-color: #7c3aed;
+  }
+  .app-style-panel .gjs-sm-sector  { border-color: #374151; }
+  .app-style-panel .gjs-field input,
+  .app-style-panel .gjs-field select {
+    background: #1f2937;
+    border-color: #374151;
+    color: #d1d5db;
+  }
+  .app-layers-panel .gjs-layer          { color: #d1d5db; }
+  .app-layers-panel .gjs-layer:hover     { background: #1f2937; }
+  .app-layers-panel .gjs-layer.gjs-selected { background: #1e1b4b; color: #c4b5fd; }
+}
