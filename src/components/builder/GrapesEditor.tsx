@@ -188,10 +188,9 @@ export default function GrapesEditor({ initialHtml, libraryBlocks = [], onReady 
         ],
       },
 
-      // Inject Tailwind CDN + Inter font inside the canvas iframe
+      // Inject Inter font inside the canvas iframe
       canvas: {
         styles: [
-          "https://cdn.tailwindcss.com",
           "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
         ],
       },

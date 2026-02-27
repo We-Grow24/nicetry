@@ -119,6 +119,7 @@ const GrapesEditor = dynamic(() => import("./GrapesEditor"), {
 export default function BuilderPage() {
   const searchParams = useSearchParams();
   const projectId    = searchParams.get("project_id");
+  const runId        = searchParams.get("run_id");
 
   const [editor,       setEditor]       = useState<Editor | null>(null);
   const [project,      setProject]      = useState<Project | null>(null);
@@ -202,6 +203,40 @@ export default function BuilderPage() {
     fetchProject();
   }, [projectId]);
 
+  //  Load pipeline_run from Supabase using run_id 
+  useEffect(() => {
+    // Only fetch if we have a valid run_id and no project_id
+    if (!runId || runId.trim() === "" || projectId) return;
+    
+    async function fetchPipelineRun() {
+      const sb = createClient();
+      const { data, error } = await sb
+        .from("pipeline_runs")
+        .select("id,prompt,answers,zone,architect_output")
+        .eq("id", runId)
+        .single();
+      
+      if (error || !data) {
+        console.warn("Failed to fetch pipeline_run:", error);
+        return;
+      }
+      
+      // Extract initial HTML from architect_output if available
+      const architectOutput = data.architect_output as Record<string, unknown> | null;
+      if (architectOutput?.html && typeof architectOutput.html === "string") {
+        setInitialHtml(architectOutput.html);
+      }
+      
+      // Set project name from prompt or zone
+      const name = data.prompt 
+        ? `${data.prompt.substring(0, 30)}${data.prompt.length > 30 ? "..." : ""}`
+        : `${data.zone || "builder"} Project`;
+      setProjectName(name);
+    }
+    
+    fetchPipelineRun();
+  }, [runId, projectId]);
+
   //  Auto-save every 30 s 
   useEffect(() => {
     if (!editor) return;
@@ -277,7 +312,6 @@ export default function BuilderPage() {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${projectName}</title>
-  <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import * as THREE from "three";
 import { PlanningAgents } from "@/components/game/PlanningAgents";
@@ -430,7 +430,7 @@ function CharacterInspector({
 
 // ─── Main page ───────────────────────────────────────────────────────────────
 
-export default function GamePage() {
+function GamePage() {
   const searchParams = useSearchParams();
   const projectId    = searchParams.get("project_id");
 
@@ -1003,5 +1003,13 @@ export default function GamePage() {
         </aside>
       </div>
     </div>
+  );
+}
+
+export default function GamePageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <GamePage />
+    </Suspense>
   );
 }

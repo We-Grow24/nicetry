@@ -198,7 +198,7 @@ function TopBar({ projectName, setProjectName, exporting, exportUrl, onExport, p
 
 // ─── Main VideoCreator ────────────────────────────────────────────────────────
 
-export default function VideoCreator() {
+function VideoCreator() {
   const searchParams  = useSearchParams();
   const projectId     = searchParams.get("project_id");
 
@@ -475,5 +475,13 @@ export default function VideoCreator() {
       />
       {/* ── Audio Studio ─────────────────────────────────────────────────────── */}
       <AudioStudio />    </div>
+  );
+}
+
+export default function VideoCreatorWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <VideoCreator />
+    </Suspense>
   );
 }

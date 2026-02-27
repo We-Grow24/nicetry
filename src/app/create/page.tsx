@@ -120,7 +120,7 @@ export default function CreatePage() {
       } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase
-        .from("users")
+        .from("user_profiles")
         .select("credits")
         .eq("id", user.id)
         .single();
@@ -244,7 +244,7 @@ export default function CreatePage() {
 
     // Re-fetch credits for safety
     const { data: userData } = await supabase
-      .from("users")
+      .from("user_profiles")
       .select("credits")
       .eq("id", user.id)
       .single();
@@ -283,11 +283,38 @@ export default function CreatePage() {
     if (runData?.id) setPipelineRunId(runData.id);
 
     // Animate pipeline stages
-    for (let i = 1; i <= PIPELINE_STAGES.length; i++) {
+    for (let i = 1; i <= PIPELINE_STAGES.length - 1; i++) {
       await new Promise<void>((resolve) =>
-        setTimeout(resolve, i === PIPELINE_STAGES.length ? 1200 : 900)
+        setTimeout(resolve, 900)
       );
       setPipelineStage(i);
+    }
+
+    // Call architect-agent to process the pipeline
+    let finalRunId = runData?.id;
+    try {
+      setPipelineStage(PIPELINE_STAGES.length - 1); // "Architecting the experience…"
+      const { data: architectData, error: architectError } = await supabase.functions.invoke<{ run_id: string }>(
+        "architect-agent",
+        {
+          body: {
+            run_id: runData?.id,
+            prompt: prompt.trim(),
+            answers,
+            zone: interrogatorResult?.zone ?? "builder",
+          },
+        }
+      );
+
+      if (!architectError && architectData?.run_id) {
+        finalRunId = architectData.run_id;
+      }
+
+      await new Promise<void>((resolve) => setTimeout(resolve, 1200));
+      setPipelineStage(PIPELINE_STAGES.length);
+    } catch (err) {
+      console.error("architect-agent error:", err);
+      // Continue with the locally created run_id if architect-agent fails
     }
 
     // Mark pipeline_run complete (best-effort)
@@ -298,9 +325,13 @@ export default function CreatePage() {
         .eq("id", runData.id);
     }
 
-    // Redirect based on zone
+    // Redirect based on zone with run_id
     const zone = interrogatorResult?.zone ?? "builder";
-    router.push(zone === "game" ? "/game" : "/builder");
+    if (zone === "game") {
+      router.push(`/game?run_id=${finalRunId}`);
+    } else {
+      router.push(`/builder?run_id=${finalRunId}`);
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────

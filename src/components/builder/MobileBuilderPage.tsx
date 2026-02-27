@@ -180,7 +180,6 @@ export default function MobileBuilderPage() {
   <meta name="apple-mobile-web-app-title" content="${projectName}" />
   <link rel="manifest" href="/manifest.json" />
   <title>${projectName}</title>
-  <script src="https://cdn.tailwindcss.com"><\/script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { box-sizing: border-box; }
