@@ -22,9 +22,7 @@ import { Editor } from "grapesjs";
 import JSZip from "jszip";
 import type { LibraryBlock } from "./GrapesEditor";
 import ExportButton from "@/components/common/ExportButton";
-import { parseMasterSeed, generateWebsiteBlockHtml } from "@/lib/masterSeedParser";
-import type { ParsedMasterSeed } from "@/lib/masterSeedParser";
-import AiGeneratedPreview from "./AiGeneratedPreview";
+import PlayablePreview from "@/components/PlayablePreview";
 
 //  Types 
 interface Project {
@@ -118,25 +116,321 @@ const GrapesEditor = dynamic(() => import("./GrapesEditor"), {
   ),
 });
 
+//  Types for canvas sections
+interface CanvasSection {
+  id: string;
+  type: string;
+  content: Record<string, unknown>;
+}
+
+//  Render master_seed into canvas sections
+function renderMasterSeed(seed: Record<string, unknown> | null): CanvasSection[] {
+  if (!seed) return [];
+  
+  const sections: CanvasSection[] = [];
+  const metadata = seed.metadata as Record<string, unknown> | undefined;
+  const zone = (metadata?.zone as string) || 'website';
+  
+  // Always add navbar + hero for websites
+  if (zone === 'website' || zone === 'builder') {
+    sections.push({ 
+      id: 'navbar', 
+      type: 'navbar', 
+      content: { title: metadata?.title || 'My Site' } 
+    });
+    sections.push({ 
+      id: 'hero', 
+      type: 'hero', 
+      content: { 
+        headline: (metadata?.title as string) || 'Welcome', 
+        niche: (metadata?.niche as string) || '' 
+      } 
+    });
+    sections.push({ 
+      id: 'footer', 
+      type: 'footer', 
+      content: {} 
+    });
+  }
+  
+  // Game: add world map + characters + missions
+  if (zone === 'game') {
+    const worldState = seed.world_state as Record<string, unknown> | undefined;
+    if (worldState) {
+      sections.push({ 
+        id: 'world', 
+        type: 'world_map', 
+        content: worldState 
+      });
+    }
+    
+    const characters = seed.characters as Record<string, unknown>[] | undefined;
+    characters?.forEach((c, i) => 
+      sections.push({ 
+        id: `char_${i}`, 
+        type: 'character_card', 
+        content: c 
+      })
+    );
+    
+    const gameplay = seed.gameplay as Record<string, unknown> | undefined;
+    const missions = gameplay?.missions as Record<string, unknown>[] | undefined;
+    missions?.forEach((m, i) =>
+      sections.push({ 
+        id: `mission_${i}`, 
+        type: 'mission_card', 
+        content: m 
+      })
+    );
+  }
+  
+  // Anime: add characters + world + episode list
+  if (zone === 'anime') {
+    const worldState = seed.world_state as Record<string, unknown> | undefined;
+    if (worldState) {
+      sections.push({ 
+        id: 'world', 
+        type: 'anime_world', 
+        content: worldState 
+      });
+    }
+    
+    const characters = seed.characters as Record<string, unknown>[] | undefined;
+    characters?.forEach((c, i) =>
+      sections.push({ 
+        id: `char_${i}`, 
+        type: 'anime_character', 
+        content: c 
+      })
+    );
+  }
+  
+  // SaaS: add dashboard + features
+  if (zone === 'saas') {
+    const worldState = seed.world_state as Record<string, unknown> | undefined;
+    if (worldState) {
+      sections.push({ 
+        id: 'dashboard', 
+        type: 'saas_dashboard', 
+        content: worldState 
+      });
+    }
+  }
+  
+  // Video: add timeline tracks
+  if (zone === 'video') {
+    const timelineTracks = seed.timeline_tracks as Record<string, unknown>[] | undefined;
+    timelineTracks?.forEach((t, i) =>
+      sections.push({ 
+        id: `track_${i}`, 
+        type: 'video_track', 
+        content: t 
+      })
+    );
+  }
+  
+  return sections;
+}
+
+//  Convert canvas sections to HTML
+function sectionsToHtml(sections: CanvasSection[]): string {
+  return sections.map(section => {
+    const { type, content } = section;
+    
+    // Navbar
+    if (type === 'navbar') {
+      const title = (content.title as string) || 'My Site';
+      return `
+<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800" data-section="navbar">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold text-gray-900 dark:text-white">${title}</h1>
+    <div class="flex gap-6">
+      <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Features</a>
+      <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</a>
+      <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">About</a>
+    </div>
+  </div>
+</nav>`;
+    }
+    
+    // Hero
+    if (type === 'hero') {
+      const headline = (content.headline as string) || 'Welcome';
+      const niche = (content.niche as string) || '';
+      const subheadline = niche ? `The best ${niche} solution` : 'Build something amazing';
+      return `
+<section class="py-24 px-6 bg-gradient-to-br from-slate-900 to-indigo-900 text-white text-center" data-section="hero">
+  <h1 class="text-5xl font-bold mb-4">${headline}</h1>
+  <p class="text-xl text-slate-300 mb-8 max-w-xl mx-auto">${subheadline}</p>
+  <a href="#" class="inline-block px-8 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-full transition">Get Started</a>
+</section>`;
+    }
+    
+    // Footer
+    if (type === 'footer') {
+      return `
+<footer class="bg-gray-900 text-gray-400 py-12 px-6" data-section="footer">
+  <div class="max-w-7xl mx-auto text-center">
+    <p class="text-sm">© 2026 Built with TailAdmin Builder</p>
+  </div>
+</footer>`;
+    }
+    
+    // World Map (Game)
+    if (type === 'world_map') {
+      const biome = (content.biome as string) || 'Unknown';
+      const weather = (content.weather as string) || 'Clear';
+      const timeOfDay = (content.time_of_day as number) || 12;
+      return `
+<section class="py-20 px-6 bg-gradient-to-br from-green-900 to-blue-900 text-white" data-section="world">
+  <h2 class="text-3xl font-bold text-center mb-12">World</h2>
+  <div class="max-w-3xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl p-8">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Biome</h4>
+        <p class="text-lg">${biome}</p>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Weather</h4>
+        <p class="text-lg">${weather}</p>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Time of Day</h4>
+        <p class="text-lg">${timeOfDay.toFixed(2)}</p>
+      </div>
+    </div>
+  </div>
+</section>`;
+    }
+    
+    // Character Card
+    if (type === 'character_card' || type === 'anime_character') {
+      const name = (content.name as string) || 'Character';
+      const role = (content.role as string) || '';
+      const appearanceSeed = (content.appearance_seed as number) || null;
+      return `
+<div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition" data-character-id="${section.id}">
+  <div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center">
+    <span class="text-2xl font-bold">${name[0] || '?'}</span>
+  </div>
+  <h3 class="font-semibold text-lg text-center mb-2 text-white">${name}</h3>
+  ${role ? `<p class="text-sm text-gray-400 text-center mb-3">${role}</p>` : ''}
+  ${appearanceSeed ? `<p class="text-xs text-gray-500 text-center">Appearance: #${appearanceSeed}</p>` : ''}
+</div>`;
+    }
+    
+    // Mission Card
+    if (type === 'mission_card') {
+      const title = (content.title as string) || 'Mission';
+      const description = (content.description as string) || '';
+      const objectives = (content.objectives as string[]) || [];
+      const difficulty = (content.difficulty as number) || null;
+      return `
+<div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700" data-mission-id="${section.id}">
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">${title}</h3>
+      ${description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${description}</p>` : ''}
+      ${objectives.length > 0 ? `
+      <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+        ${objectives.map(obj => `<li>• ${obj}</li>`).join('')}
+      </ul>
+      ` : ''}
+    </div>
+    ${difficulty ? `
+    <div class="ml-4 px-3 py-1 rounded-full text-xs font-medium ${
+      difficulty <= 3 ? 'bg-green-100 text-green-700' : 
+      difficulty <= 6 ? 'bg-yellow-100 text-yellow-700' : 
+      'bg-red-100 text-red-700'
+    }">
+      Level ${difficulty}
+    </div>
+    ` : ''}
+  </div>
+</div>`;
+    }
+    
+    // Video Track
+    if (type === 'video_track') {
+      const trackType = (content.type as string) || 'track';
+      const events = (content.events as Record<string, unknown>[]) || [];
+      return `
+<div class="bg-gray-800 rounded-lg p-4" data-track-type="${trackType}">
+  <h3 class="font-semibold mb-3 text-indigo-400">${trackType.toUpperCase()} Track</h3>
+  <div class="flex gap-2 overflow-x-auto">
+    ${events.map((evt, evtIdx) => {
+      const evtType = (evt.type as string) || 'Event';
+      const duration = (evt.duration as number) || null;
+      return `
+    <div class="shrink-0 w-32 h-20 bg-gray-700 rounded border border-gray-600 p-2 text-xs text-white">
+      <p class="font-medium">${evtType} ${evtIdx + 1}</p>
+      ${duration ? `<p class="text-gray-400">${duration}s</p>` : ''}
+    </div>
+      `;
+    }).join('')}
+  </div>
+</div>`;
+    }
+    
+    // Anime World
+    if (type === 'anime_world') {
+      return `
+<section class="py-20 px-6 bg-gradient-to-br from-purple-900 to-pink-900 text-white" data-section="world">
+  <h2 class="text-3xl font-bold text-center mb-12">World</h2>
+  <div class="max-w-3xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl p-8">
+    <p class="text-gray-300">Anime world details...</p>
+  </div>
+</section>`;
+    }
+    
+    // SaaS Dashboard
+    if (type === 'saas_dashboard') {
+      return `
+<section class="py-20 px-6 bg-gray-50 dark:bg-gray-900" data-section="dashboard">
+  <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Dashboard</h2>
+  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Users</p>
+      <p class="text-3xl font-bold text-gray-900 dark:text-white">1,234</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Revenue</p>
+      <p class="text-3xl font-bold text-gray-900 dark:text-white">$12,345</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Active</p>
+      <p class="text-3xl font-bold text-gray-900 dark:text-white">567</p>
+    </div>
+  </div>
+</section>`;
+    }
+    
+    // Fallback
+    return `
+<section class="py-16 px-6 bg-white dark:bg-gray-800" data-section="${type}">
+  <div class="max-w-4xl mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">${type}</h2>
+    <p class="text-gray-500 dark:text-gray-400">Section content</p>
+  </div>
+</section>`;
+  }).join('\n');
+}
+
 //  Main Component 
 export default function BuilderPage() {
   const searchParams = useSearchParams();
   const projectId    = searchParams.get("project_id");
   const runId        = searchParams.get("run_id");
 
-  // Validate run_id
-  console.log('[builder] run_id from URL:', runId);
-  if (runId && (runId === '1' || runId.length < 10)) {
-    console.warn('[builder] Invalid run_id, skipping fetch');
-  }
-
   const [editor,       setEditor]       = useState<Editor | null>(null);
   const [project,      setProject]      = useState<Project | null>(null);
   const [projectName,  setProjectName]  = useState("Untitled Project");
   const [initialHtml,  setInitialHtml]  = useState<string | undefined>(undefined);
   const [libraryBlocks, setLibraryBlocks] = useState<LibraryBlock[]>([]);
-  const [parsedSeed,   setParsedSeed]   = useState<ParsedMasterSeed | null>(null);
+  const [canvasSections, setCanvasSections] = useState<CanvasSection[]>([]);
   const [autoLoadedContent, setAutoLoadedContent] = useState(false);
+  const [masterSeed, setMasterSeed] = useState<Record<string, unknown> | null>(null);
+  const [showPlayablePreview, setShowPlayablePreview] = useState(false);
 
   const [saving,     setSaving]     = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -202,6 +496,12 @@ export default function BuilderPage() {
       const proj = data as Project;
       setProject(proj);
       const seed = proj.master_director_seed as Record<string, unknown> | null;
+      
+      // Store master_seed for playable preview
+      if (seed) {
+        setMasterSeed(seed);
+      }
+      
       // builder stores saved HTML under seed.builder_html
       if (seed?.builder_html && typeof seed.builder_html === "string") {
         setInitialHtml(seed.builder_html);
@@ -214,51 +514,53 @@ export default function BuilderPage() {
     fetchProject();
   }, [projectId]);
 
-  //  Load pipeline_run from Supabase using run_id 
+  //  Load pipeline_run from Supabase using run_id — MAGICAL AI-GENERATED LAYOUT
   useEffect(() => {
-    // Only fetch if we have a valid run_id and no project_id
-    if (!runId || runId.trim() === "" || runId === '1' || runId.length < 10 || projectId) return;
+    // Only fetch if we have a valid run_id (UUID length > 30)
+    if (!runId || runId.length <= 30 || projectId) return;
     
     async function fetchPipelineRun() {
+      console.log('[builder] 🎨 Loading AI-generated layout from run_id:', runId);
       const sb = createClient();
-      const { data, error } = await sb
+      const { data: run, error } = await sb
         .from("pipeline_runs")
-        .select("id,prompt,answers,zone,master_seed")
+        .select("master_seed, zone_type, prompt")
         .eq("id", runId)
         .single();
       
-      if (error || !data) {
-        console.warn("Failed to fetch pipeline_run:", error);
+      if (error || !run) {
+        console.warn('[builder] Failed to fetch pipeline_run:', error);
         return;
       }
       
-      // Extract initial HTML from master_seed if available
-      const masterSeed = data.master_seed as Record<string, unknown> | null;
-      console.log('[builder] master_seed loaded:', masterSeed?.metadata);
-      
-      // Parse the master_seed for AI-generated content
-      const parsed = parseMasterSeed(masterSeed);
-      console.log('[builder] parsed master_seed:', parsed);
-      setParsedSeed(parsed);
-      
-      if (masterSeed?.html && typeof masterSeed.html === "string") {
-        setInitialHtml(masterSeed.html);
-      } else if (parsed?.html) {
-        setInitialHtml(parsed.html);
-      } else if (parsed?.websiteBlocks && parsed.websiteBlocks.length > 0) {
-        // Auto-generate HTML from website blocks
-        const combinedHtml = parsed.websiteBlocks
-          .map(block => generateWebsiteBlockHtml(block))
-          .join('\n');
-        setInitialHtml(combinedHtml);
-        console.log('[builder] auto-generated HTML from blocks');
+      // If master_seed exists, render it into canvas sections
+      if (run?.master_seed) {
+        const masterSeed = run.master_seed as Record<string, unknown>;
+        console.log('[builder] ✨ master_seed loaded:', masterSeed.metadata);
+        
+        // Store master_seed for playable preview
+        setMasterSeed(masterSeed);
+        
+        // MAGICAL: Call renderMasterSeed to get structured sections
+        const sections = renderMasterSeed(masterSeed);
+        console.log(`[builder] 🎯 Generated ${sections.length} sections from master_seed`);
+        
+        // Store sections for later use
+        setCanvasSections(sections);
+        
+        // Convert sections to HTML for the canvas
+        if (sections.length > 0) {
+          const html = sectionsToHtml(sections);
+          setInitialHtml(html);
+          setAutoLoadedContent(true);
+          console.log('[builder] 🚀 AI-generated layout loaded to canvas!');
+        }
+        
+        // Set project name from metadata or prompt
+        const metadata = masterSeed.metadata as Record<string, unknown> | undefined;
+        const title = (metadata?.title as string) || run.prompt?.substring(0, 30) || 'AI Project';
+        setProjectName(title);
       }
-      
-      // Set project name from prompt or zone
-      const name = data.prompt 
-        ? `${data.prompt.substring(0, 30)}${data.prompt.length > 30 ? "..." : ""}`
-        : `${data.zone || "builder"} Project`;
-      setProjectName(parsed?.title || name);
     }
     
     fetchPipelineRun();
@@ -276,178 +578,19 @@ export default function BuilderPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, project]);
 
-  //  Auto-load AI content notification 
+  //  Character cards grid (for game/anime zones — wrap individual cards)
   useEffect(() => {
-    if (parsedSeed && initialHtml && !autoLoadedContent) {
-      setAutoLoadedContent(true);
-      console.log('[builder] ✨ AI-generated content auto-loaded to canvas');
-    }
-  }, [parsedSeed, initialHtml, autoLoadedContent]);
-
-  //  AUTOMATIC SECTION RENDERING from parsed master_seed 
-  useEffect(() => {
-    if (!parsedSeed || !editor || autoLoadedContent) return;
-    if (initialHtml && initialHtml.trim().length > 50) return; // Skip if HTML already set
+    if (canvasSections.length === 0 || !editor) return;
     
-    console.log('[builder] 🎨 Auto-rendering sections from master_seed...');
-    const wrapper = editor.getWrapper();
-    if (!wrapper) return;
-
-    const sections: string[] = [];
-
-    // 1. Hero section from metadata
-    if (parsedSeed.raw?.metadata) {
-      const rawSeed = parsedSeed.raw as unknown as Record<string, unknown>;
-      const metadata = rawSeed.metadata as Record<string, unknown>;
-      const title = parsedSeed.title || "Welcome";
-      const headline = (metadata.headline as string) || (metadata.title as string) || title;
-      const subheadline = (metadata.tagline as string) || (metadata.description as string) || "Build something amazing";
-      const heroHtml = `
-<section class="py-24 px-6 bg-gradient-to-br from-slate-900 to-indigo-900 text-white text-center" data-section="hero">
-  <h1 class="text-5xl font-bold mb-4">${headline}</h1>
-  <p class="text-xl text-slate-300 mb-8 max-w-xl mx-auto">${subheadline}</p>
-  <a href="#" class="inline-block px-8 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-full transition">Get Started</a>
-</section>`;
-      sections.push(heroHtml);
+    // Wrap character cards in a grid container
+    const charCards = canvasSections.filter(s => 
+      s.type === 'character_card' || s.type === 'anime_character'
+    );
+    
+    if (charCards.length > 0) {
+      console.log(`[builder] 🎭 ${charCards.length} character cards loaded`);
     }
-
-    // 2. Website blocks
-    if (parsedSeed.websiteBlocks && parsedSeed.websiteBlocks.length > 0) {
-      parsedSeed.websiteBlocks.forEach((block) => {
-        const blockHtml = generateWebsiteBlockHtml(block);
-        sections.push(blockHtml);
-      });
-    }
-
-    // 3. Characters section (for game/anime)
-    if (parsedSeed.characters && parsedSeed.characters.length > 0) {
-      const charactersHtml = `
-<section class="py-20 px-6 bg-gray-900 text-white" data-section="characters">
-  <h2 class="text-3xl font-bold text-center mb-12">Characters</h2>
-  <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-    ${parsedSeed.characters.map(char => `
-    <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition" data-character-id="${char.id}">
-      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center">
-        <span class="text-2xl font-bold">${char.name?.[0] || '?'}</span>
-      </div>
-      <h3 class="font-semibold text-lg text-center mb-2">${char.name || 'Character'}</h3>
-      ${char.role ? `<p class="text-sm text-gray-400 text-center mb-3">${char.role}</p>` : ''}
-      ${char.appearance_seed ? `<p class="text-xs text-gray-500 text-center">Appearance: #${char.appearance_seed}</p>` : ''}
-    </div>
-    `).join('')}
-  </div>
-</section>`;
-      sections.push(charactersHtml);
-    }
-
-    // 4. Missions section (for games)
-    if (parsedSeed.missions && parsedSeed.missions.length > 0) {
-      const missionsHtml = `
-<section class="py-20 px-6 bg-gray-50 dark:bg-gray-800" data-section="missions">
-  <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Missions</h2>
-  <div class="max-w-4xl mx-auto space-y-4">
-    ${parsedSeed.missions.map(mission => `
-    <div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700" data-mission-id="${mission.id}">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">${mission.title || 'Mission'}</h3>
-          ${mission.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${mission.description}</p>` : ''}
-          ${mission.objectives && mission.objectives.length > 0 ? `
-          <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-            ${mission.objectives.map(obj => `<li>• ${obj}</li>`).join('')}
-          </ul>
-          ` : ''}
-        </div>
-        ${mission.difficulty ? `
-        <div class="ml-4 px-3 py-1 rounded-full text-xs font-medium ${
-          mission.difficulty <= 3 ? 'bg-green-100 text-green-700' : 
-          mission.difficulty <= 6 ? 'bg-yellow-100 text-yellow-700' : 
-          'bg-red-100 text-red-700'
-        }">
-          Level ${mission.difficulty}
-        </div>
-        ` : ''}
-      </div>
-    </div>
-    `).join('')}
-  </div>
-</section>`;
-      sections.push(missionsHtml);
-    }
-
-    // 5. World Map section (for games)
-    if (parsedSeed.worldMap) {
-      const wm = parsedSeed.worldMap;
-      const worldHtml = `
-<section class="py-20 px-6 bg-gradient-to-br from-green-900 to-blue-900 text-white" data-section="world">
-  <h2 class="text-3xl font-bold text-center mb-12">World</h2>
-  <div class="max-w-3xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl p-8">
-    <div class="grid md:grid-cols-2 gap-6">
-      ${wm.biome ? `
-      <div>
-        <h4 class="text-sm font-semibold text-gray-300 mb-1">Biome</h4>
-        <p class="text-lg">${wm.biome}</p>
-      </div>
-      ` : ''}
-      ${wm.weather ? `
-      <div>
-        <h4 class="text-sm font-semibold text-gray-300 mb-1">Weather</h4>
-        <p class="text-lg">${wm.weather}</p>
-      </div>
-      ` : ''}
-      ${wm.time_of_day !== undefined ? `
-      <div>
-        <h4 class="text-sm font-semibold text-gray-300 mb-1">Time of Day</h4>
-        <p class="text-lg">${wm.time_of_day.toFixed(2)}</p>
-      </div>
-      ` : ''}
-    </div>
-  </div>
-</section>`;
-      sections.push(worldHtml);
-    }
-
-    // 6. Timeline tracks (for video/anime)
-    const timelineTracks = parsedSeed.raw?.timeline_tracks as unknown[] | undefined;
-    if (timelineTracks && Array.isArray(timelineTracks) && timelineTracks.length > 0) {
-      const timelineHtml = `
-<section class="py-20 px-6 bg-gray-900 text-white" data-section="timeline">
-  <h2 class="text-3xl font-bold text-center mb-12">Timeline</h2>
-  <div class="max-w-5xl mx-auto space-y-4">
-    ${timelineTracks.map((track: unknown, idx: number) => {
-      const t = track as Record<string, unknown>;
-      const trackType = (t.type as string) || 'track';
-      const events = (t.events as unknown[]) || [];
-      return `
-    <div class="bg-gray-800 rounded-lg p-4" data-track-type="${trackType}">
-      <h3 class="font-semibold mb-3 text-indigo-400">${trackType.toUpperCase()} Track</h3>
-      <div class="flex gap-2 overflow-x-auto">
-        ${events.map((evt: unknown, evtIdx: number) => {
-          const e = evt as Record<string, unknown>;
-          return `
-        <div class="shrink-0 w-32 h-20 bg-gray-700 rounded border border-gray-600 p-2 text-xs">
-          <p class="font-medium">${e.type || 'Event'} ${evtIdx + 1}</p>
-          ${e.duration ? `<p class="text-gray-400">${e.duration}s</p>` : ''}
-        </div>
-          `;
-        }).join('')}
-      </div>
-    </div>
-      `;
-    }).join('')}
-  </div>
-</section>`;
-      sections.push(timelineHtml);
-    }
-
-    // Add all sections to canvas
-    if (sections.length > 0) {
-      const combinedHtml = sections.join('\n');
-      editor.setComponents(combinedHtml);
-      setAutoLoadedContent(true);
-      console.log(`[builder] ✨ Auto-rendered ${sections.length} sections from master_seed!`);
-    }
-  }, [parsedSeed, editor, autoLoadedContent, initialHtml]);
+  }, [canvasSections, editor]);
 
   //  Block search filter 
   useEffect(() => {
@@ -712,7 +855,7 @@ ${html}
 
           <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
 
-          {/* Preview */}
+          {/* Canvas Preview */}
           <button
             onClick={handlePreview}
             className="inline-flex items-center gap-1.5 px-3 h-8 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -721,8 +864,22 @@ ${html}
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Preview
+            Canvas
           </button>
+
+          {/* Live Preview (Playable) */}
+          {masterSeed && (
+            <button
+              onClick={() => setShowPlayablePreview(true)}
+              className="inline-flex items-center gap-1.5 px-3 h-8 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-sm"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Live Preview
+            </button>
+          )}
 
           {/* Export */}
           <ExportButton
@@ -761,12 +918,24 @@ ${html}
           md:relative md:top-auto md:bottom-auto md:left-auto md:flex md:w-64 md:shadow-none md:z-10
           flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden
         `}>
-          {/* Show AI-generated content if available, otherwise show blocks */}
-          {parsedSeed ? (
-            <AiGeneratedPreview 
-              parsedSeed={parsedSeed} 
-              onAddToCanvas={handleAddToCanvas}
-            />
+          {/* Show AI-generated content notification if available, otherwise show blocks */}
+          {autoLoadedContent && canvasSections.length > 0 ? (
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">✨ AI Generated Layout</h3>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {canvasSections.length} sections auto-generated and loaded to canvas!
+              </p>
+              <div className="space-y-2 pt-4">
+                {canvasSections.map(section => (
+                  <div key={section.id} className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                    <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{section.type}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <>
               {/* Header */}
@@ -921,6 +1090,14 @@ ${html}
           </div>
         </aside>
       </div>
+
+      {/* Playable Preview Modal */}
+      {showPlayablePreview && masterSeed && (
+        <PlayablePreview
+          masterSeed={masterSeed}
+          onClose={() => setShowPlayablePreview(false)}
+        />
+      )}
     </div>
   );
 }

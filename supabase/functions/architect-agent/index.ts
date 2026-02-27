@@ -408,30 +408,28 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Fire-and-forget: never await wisdom-agent — a missing/slow wisdom-agent
   // must not block or error the architect response.
-  const fireWisdom = () =>
-    fetch(supabaseFunctionsUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${serviceKey}`,
-        "Content-Type": "application/json",
-        apikey: serviceKey,
-      },
-      body: JSON.stringify(wisdomPayload),
-    })
-    .then(async (res) => {
-      if (!res.ok) console.warn("[architect-agent] wisdom-agent non-2xx:", await res.text());
-      else console.log("[architect-agent] wisdom-agent queued ok");
-    })
-    .catch((err) => console.warn("[architect-agent] wisdom-agent unreachable:", err));
-
-  // Use EdgeRuntime.waitUntil when available (Supabase hosted runtime),
-  // otherwise just kick off the promise without blocking.
-  try {
-    // @ts-ignore: EdgeRuntime is available in Supabase hosted Deno
-    EdgeRuntime.waitUntil(fireWisdom());
-  } catch {
-    fireWisdom(); // swallow — wisdom-agent is optional at this stage
+  const fireWisdom = async () => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000) // 5s max
+    try {
+      await fetch(supabaseFunctionsUrl, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+          apikey: serviceKey,
+        },
+        body: JSON.stringify(wisdomPayload),
+      })
+    } catch {
+      console.warn('[architect] wisdom-agent timed out — continuing')
+    } finally {
+      clearTimeout(timeout)
+    }
   }
+
+  try { EdgeRuntime.waitUntil(fireWisdom()) } catch { fireWisdom() }
 
   // ── 6. Return Master Director JSON to caller ──────────────────────────────
   return jsonResponse({
