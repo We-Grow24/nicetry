@@ -22,6 +22,9 @@ import { Editor } from "grapesjs";
 import JSZip from "jszip";
 import type { LibraryBlock } from "./GrapesEditor";
 import ExportButton from "@/components/common/ExportButton";
+import { parseMasterSeed, generateWebsiteBlockHtml } from "@/lib/masterSeedParser";
+import type { ParsedMasterSeed } from "@/lib/masterSeedParser";
+import AiGeneratedPreview from "./AiGeneratedPreview";
 
 //  Types 
 interface Project {
@@ -121,11 +124,19 @@ export default function BuilderPage() {
   const projectId    = searchParams.get("project_id");
   const runId        = searchParams.get("run_id");
 
+  // Validate run_id
+  console.log('[builder] run_id from URL:', runId);
+  if (runId && (runId === '1' || runId.length < 10)) {
+    console.warn('[builder] Invalid run_id, skipping fetch');
+  }
+
   const [editor,       setEditor]       = useState<Editor | null>(null);
   const [project,      setProject]      = useState<Project | null>(null);
   const [projectName,  setProjectName]  = useState("Untitled Project");
   const [initialHtml,  setInitialHtml]  = useState<string | undefined>(undefined);
   const [libraryBlocks, setLibraryBlocks] = useState<LibraryBlock[]>([]);
+  const [parsedSeed,   setParsedSeed]   = useState<ParsedMasterSeed | null>(null);
+  const [autoLoadedContent, setAutoLoadedContent] = useState(false);
 
   const [saving,     setSaving]     = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -206,13 +217,13 @@ export default function BuilderPage() {
   //  Load pipeline_run from Supabase using run_id 
   useEffect(() => {
     // Only fetch if we have a valid run_id and no project_id
-    if (!runId || runId.trim() === "" || projectId) return;
+    if (!runId || runId.trim() === "" || runId === '1' || runId.length < 10 || projectId) return;
     
     async function fetchPipelineRun() {
       const sb = createClient();
       const { data, error } = await sb
         .from("pipeline_runs")
-        .select("id,prompt,answers,zone,architect_output")
+        .select("id,prompt,answers,zone,master_seed")
         .eq("id", runId)
         .single();
       
@@ -221,17 +232,33 @@ export default function BuilderPage() {
         return;
       }
       
-      // Extract initial HTML from architect_output if available
-      const architectOutput = data.architect_output as Record<string, unknown> | null;
-      if (architectOutput?.html && typeof architectOutput.html === "string") {
-        setInitialHtml(architectOutput.html);
+      // Extract initial HTML from master_seed if available
+      const masterSeed = data.master_seed as Record<string, unknown> | null;
+      console.log('[builder] master_seed loaded:', masterSeed?.metadata);
+      
+      // Parse the master_seed for AI-generated content
+      const parsed = parseMasterSeed(masterSeed);
+      console.log('[builder] parsed master_seed:', parsed);
+      setParsedSeed(parsed);
+      
+      if (masterSeed?.html && typeof masterSeed.html === "string") {
+        setInitialHtml(masterSeed.html);
+      } else if (parsed?.html) {
+        setInitialHtml(parsed.html);
+      } else if (parsed?.websiteBlocks && parsed.websiteBlocks.length > 0) {
+        // Auto-generate HTML from website blocks
+        const combinedHtml = parsed.websiteBlocks
+          .map(block => generateWebsiteBlockHtml(block))
+          .join('\n');
+        setInitialHtml(combinedHtml);
+        console.log('[builder] auto-generated HTML from blocks');
       }
       
       // Set project name from prompt or zone
       const name = data.prompt 
         ? `${data.prompt.substring(0, 30)}${data.prompt.length > 30 ? "..." : ""}`
         : `${data.zone || "builder"} Project`;
-      setProjectName(name);
+      setProjectName(parsed?.title || name);
     }
     
     fetchPipelineRun();
@@ -248,6 +275,179 @@ export default function BuilderPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, project]);
+
+  //  Auto-load AI content notification 
+  useEffect(() => {
+    if (parsedSeed && initialHtml && !autoLoadedContent) {
+      setAutoLoadedContent(true);
+      console.log('[builder] ✨ AI-generated content auto-loaded to canvas');
+    }
+  }, [parsedSeed, initialHtml, autoLoadedContent]);
+
+  //  AUTOMATIC SECTION RENDERING from parsed master_seed 
+  useEffect(() => {
+    if (!parsedSeed || !editor || autoLoadedContent) return;
+    if (initialHtml && initialHtml.trim().length > 50) return; // Skip if HTML already set
+    
+    console.log('[builder] 🎨 Auto-rendering sections from master_seed...');
+    const wrapper = editor.getWrapper();
+    if (!wrapper) return;
+
+    const sections: string[] = [];
+
+    // 1. Hero section from metadata
+    if (parsedSeed.raw?.metadata) {
+      const rawSeed = parsedSeed.raw as unknown as Record<string, unknown>;
+      const metadata = rawSeed.metadata as Record<string, unknown>;
+      const title = parsedSeed.title || "Welcome";
+      const headline = (metadata.headline as string) || (metadata.title as string) || title;
+      const subheadline = (metadata.tagline as string) || (metadata.description as string) || "Build something amazing";
+      const heroHtml = `
+<section class="py-24 px-6 bg-gradient-to-br from-slate-900 to-indigo-900 text-white text-center" data-section="hero">
+  <h1 class="text-5xl font-bold mb-4">${headline}</h1>
+  <p class="text-xl text-slate-300 mb-8 max-w-xl mx-auto">${subheadline}</p>
+  <a href="#" class="inline-block px-8 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-full transition">Get Started</a>
+</section>`;
+      sections.push(heroHtml);
+    }
+
+    // 2. Website blocks
+    if (parsedSeed.websiteBlocks && parsedSeed.websiteBlocks.length > 0) {
+      parsedSeed.websiteBlocks.forEach((block) => {
+        const blockHtml = generateWebsiteBlockHtml(block);
+        sections.push(blockHtml);
+      });
+    }
+
+    // 3. Characters section (for game/anime)
+    if (parsedSeed.characters && parsedSeed.characters.length > 0) {
+      const charactersHtml = `
+<section class="py-20 px-6 bg-gray-900 text-white" data-section="characters">
+  <h2 class="text-3xl font-bold text-center mb-12">Characters</h2>
+  <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+    ${parsedSeed.characters.map(char => `
+    <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition" data-character-id="${char.id}">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center">
+        <span class="text-2xl font-bold">${char.name?.[0] || '?'}</span>
+      </div>
+      <h3 class="font-semibold text-lg text-center mb-2">${char.name || 'Character'}</h3>
+      ${char.role ? `<p class="text-sm text-gray-400 text-center mb-3">${char.role}</p>` : ''}
+      ${char.appearance_seed ? `<p class="text-xs text-gray-500 text-center">Appearance: #${char.appearance_seed}</p>` : ''}
+    </div>
+    `).join('')}
+  </div>
+</section>`;
+      sections.push(charactersHtml);
+    }
+
+    // 4. Missions section (for games)
+    if (parsedSeed.missions && parsedSeed.missions.length > 0) {
+      const missionsHtml = `
+<section class="py-20 px-6 bg-gray-50 dark:bg-gray-800" data-section="missions">
+  <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Missions</h2>
+  <div class="max-w-4xl mx-auto space-y-4">
+    ${parsedSeed.missions.map(mission => `
+    <div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700" data-mission-id="${mission.id}">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">${mission.title || 'Mission'}</h3>
+          ${mission.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${mission.description}</p>` : ''}
+          ${mission.objectives && mission.objectives.length > 0 ? `
+          <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+            ${mission.objectives.map(obj => `<li>• ${obj}</li>`).join('')}
+          </ul>
+          ` : ''}
+        </div>
+        ${mission.difficulty ? `
+        <div class="ml-4 px-3 py-1 rounded-full text-xs font-medium ${
+          mission.difficulty <= 3 ? 'bg-green-100 text-green-700' : 
+          mission.difficulty <= 6 ? 'bg-yellow-100 text-yellow-700' : 
+          'bg-red-100 text-red-700'
+        }">
+          Level ${mission.difficulty}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    `).join('')}
+  </div>
+</section>`;
+      sections.push(missionsHtml);
+    }
+
+    // 5. World Map section (for games)
+    if (parsedSeed.worldMap) {
+      const wm = parsedSeed.worldMap;
+      const worldHtml = `
+<section class="py-20 px-6 bg-gradient-to-br from-green-900 to-blue-900 text-white" data-section="world">
+  <h2 class="text-3xl font-bold text-center mb-12">World</h2>
+  <div class="max-w-3xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl p-8">
+    <div class="grid md:grid-cols-2 gap-6">
+      ${wm.biome ? `
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Biome</h4>
+        <p class="text-lg">${wm.biome}</p>
+      </div>
+      ` : ''}
+      ${wm.weather ? `
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Weather</h4>
+        <p class="text-lg">${wm.weather}</p>
+      </div>
+      ` : ''}
+      ${wm.time_of_day !== undefined ? `
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-1">Time of Day</h4>
+        <p class="text-lg">${wm.time_of_day.toFixed(2)}</p>
+      </div>
+      ` : ''}
+    </div>
+  </div>
+</section>`;
+      sections.push(worldHtml);
+    }
+
+    // 6. Timeline tracks (for video/anime)
+    const timelineTracks = parsedSeed.raw?.timeline_tracks as unknown[] | undefined;
+    if (timelineTracks && Array.isArray(timelineTracks) && timelineTracks.length > 0) {
+      const timelineHtml = `
+<section class="py-20 px-6 bg-gray-900 text-white" data-section="timeline">
+  <h2 class="text-3xl font-bold text-center mb-12">Timeline</h2>
+  <div class="max-w-5xl mx-auto space-y-4">
+    ${timelineTracks.map((track: unknown, idx: number) => {
+      const t = track as Record<string, unknown>;
+      const trackType = (t.type as string) || 'track';
+      const events = (t.events as unknown[]) || [];
+      return `
+    <div class="bg-gray-800 rounded-lg p-4" data-track-type="${trackType}">
+      <h3 class="font-semibold mb-3 text-indigo-400">${trackType.toUpperCase()} Track</h3>
+      <div class="flex gap-2 overflow-x-auto">
+        ${events.map((evt: unknown, evtIdx: number) => {
+          const e = evt as Record<string, unknown>;
+          return `
+        <div class="shrink-0 w-32 h-20 bg-gray-700 rounded border border-gray-600 p-2 text-xs">
+          <p class="font-medium">${e.type || 'Event'} ${evtIdx + 1}</p>
+          ${e.duration ? `<p class="text-gray-400">${e.duration}s</p>` : ''}
+        </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+      `;
+    }).join('')}
+  </div>
+</section>`;
+      sections.push(timelineHtml);
+    }
+
+    // Add all sections to canvas
+    if (sections.length > 0) {
+      const combinedHtml = sections.join('\n');
+      editor.setComponents(combinedHtml);
+      setAutoLoadedContent(true);
+      console.log(`[builder] ✨ Auto-rendered ${sections.length} sections from master_seed!`);
+    }
+  }, [parsedSeed, editor, autoLoadedContent, initialHtml]);
 
   //  Block search filter 
   useEffect(() => {
@@ -392,6 +592,16 @@ ${html}
       setAiLoading(false);
     }
   }, [editor, aiPrompt]);
+
+  //  Add AI content to canvas 
+  const handleAddToCanvas = useCallback((html: string) => {
+    if (!editor) return;
+    const wrapper = editor.getWrapper();
+    if (wrapper) {
+      editor.addComponents(html, { at: wrapper.components().length });
+      console.log('[builder] Added AI content to canvas');
+    }
+  }, [editor]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-950 overflow-hidden">
@@ -551,29 +761,39 @@ ${html}
           md:relative md:top-auto md:bottom-auto md:left-auto md:flex md:w-64 md:shadow-none md:z-10
           flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden
         `}>
-          {/* Header */}
-          <div className="px-3 pt-3 pb-2 border-b border-gray-100 dark:border-gray-800">
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Blocks</p>
-            {/* Search */}
-            <div className="relative">
-              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search blocks"
-                value={blockSearch}
-                onChange={(e) => setBlockSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:border-indigo-400 text-gray-700 dark:text-gray-300 placeholder-gray-400 transition-colors"
-              />
-            </div>
-          </div>
+          {/* Show AI-generated content if available, otherwise show blocks */}
+          {parsedSeed ? (
+            <AiGeneratedPreview 
+              parsedSeed={parsedSeed} 
+              onAddToCanvas={handleAddToCanvas}
+            />
+          ) : (
+            <>
+              {/* Header */}
+              <div className="px-3 pt-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Blocks</p>
+                {/* Search */}
+                <div className="relative">
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search blocks"
+                    value={blockSearch}
+                    onChange={(e) => setBlockSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:border-indigo-400 text-gray-700 dark:text-gray-300 placeholder-gray-400 transition-colors"
+                  />
+                </div>
+              </div>
 
-          {/* GrapesJS block manager renders here */}
-          <div
-            id="gjs-blocks"
-            className="flex-1 overflow-y-auto builder-blocks-panel"
-          />
+              {/* GrapesJS block manager renders here */}
+              <div
+                id="gjs-blocks"
+                className="flex-1 overflow-y-auto builder-blocks-panel"
+              />
+            </>
+          )}
         </aside>
 
         {/*  CANVAS  */}

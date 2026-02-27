@@ -308,6 +308,7 @@ export default function CreatePage() {
 
       if (!architectError && architectData?.run_id) {
         finalRunId = architectData.run_id;
+        console.log('[create] redirecting to builder with run_id:', architectData.run_id);
       }
 
       await new Promise<void>((resolve) => setTimeout(resolve, 1200));
